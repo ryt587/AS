@@ -1,0 +1,317 @@
+﻿@page
+@model _211933M_Assn.Pages.RegisterModel
+@{
+
+}
+<style>
+    .modal-backdrop {
+        /* bug fix - no overlay */
+        display: none;
+    }
+
+    body {
+        color: #1a202c;
+        text-align: left;
+        background-color: #e2e8f0;
+    }
+
+    .main-body {
+        padding: 15px;
+    }
+
+    .card {
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, .1), 0 1px 2px 0 rgba(0, 0, 0, .06);
+    }
+
+    .card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        word-wrap: break-word;
+        background-color: #fff;
+        background-clip: border-box;
+        border: 0 solid rgba(0, 0, 0, .125);
+        border-radius: .25rem;
+    }
+
+    .card-body {
+        flex: 1 1 auto;
+        min-height: 1px;
+        padding: 1rem;
+    }
+
+    .gutters-sm {
+        margin-right: -8px;
+        margin-left: -8px;
+    }
+
+        .gutters-sm > .col,
+        .gutters-sm > [class*=col-] {
+            padding-right: 8px;
+            padding-left: 8px;
+        }
+
+    .mb-3,
+    .my-3 {
+        margin-bottom: 1rem !important;
+    }
+
+    .bg-gray-300 {
+        background-color: #e2e8f0;
+    }
+
+    .h-100 {
+        height: 100% !important;
+    }
+
+    .shadow-none {
+        box-shadow: none !important;
+    }
+
+    /* Set a style for all buttons */
+
+    .container2 {
+        padding: 16px;
+        text-align: center;
+    }
+
+    button:hover {
+        opacity: 1;
+    }
+
+    /* Float cancel and delete buttons and add an equal width */
+    .cancelbtn,
+    .deletebtn {
+        float: left;
+        width: 50%;
+    }
+
+    /* Add a color to the cancel button */
+    .cancelbtn {
+        background-color: #ccc;
+        color: black;
+    }
+
+    /* Add a color to the delete button */
+    .deletebtn {
+        background-color: #f44336;
+    }
+
+    /* The Modal (background) */
+    .modal {
+        display: none;
+        /* Hidden by default */
+        position: fixed;
+        /* Stay in place */
+        z-index: 1;
+        /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%;
+        /* Full width */
+        height: 100%;
+        /* Full height */
+        overflow: auto;
+        /* Enable scroll if needed */
+        background-color: #474e5d;
+        padding-top: 50px;
+    }
+
+    /* Modal Content/Box */
+    .modal-content {
+        background-color: #fefefe;
+        margin: 5% auto 15% auto;
+        /* 5% from the top, 15% from the bottom and centered */
+        border: 1px solid #888;
+        width: 80%;
+        /* Could be more or less, depending on screen size */
+    }
+
+    /* Style the horizontal ruler */
+    hr {
+        border: 1px solid #f1f1f1;
+        margin-bottom: 25px;
+    }
+
+    /* The Modal Close Button (x) */
+    .close {
+        position: absolute;
+        right: 35px;
+        top: 15px;
+        font-size: 40px;
+        font-weight: bold;
+        color: #f1f1f1;
+    }
+
+        .close:hover,
+        .close:focus {
+            color: #f44336;
+            cursor: pointer;
+        }
+
+    /* Clear floats */
+    .clearfix::after {
+        content: "";
+        clear: both;
+        display: table;
+    }
+
+    /* Change styles for cancel button and delete button on extra small screens */
+    @@media screen and (max-width: 300px) {
+
+        .cancelbtn,
+        .deletebtn {
+            width: 100%;
+        }
+    }
+</style>
+<div class="container">
+    <div class="main-body">
+        <form action="" method="post" enctype="multipart/form-data" asp-antiforgery="true">
+        <div class="row gutters-sm">
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex flex-column align-items-center text-center">
+                            <div class="mt-3">
+	                            <div asp-validation-summary="All" class="text-danger"></div>
+                                    <img src="@("/Uploads/profile_pic.png")" onerror="this.src='/uploads/user.png'" alt="Admin" class="rounded-circle" width="150">
+                                    <hr>
+                                    <div clss="modal-footer">
+                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#image">
+                                            Edit
+                                        </button>
+                                    </div>
+                                    <!-- Modal -->
+                                    <div class="modal fade" id="image" tabindex="-1" aria-labelledby="exampleModalLabel"
+                                         style="display:none;" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="image">Profile Image</h5>
+                                                    <span style="float:right;">
+                                                        <button type="button" class="btn-close"
+                                                                data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </span>
+                                                </div>
+                                                <div class="modal-body">
+                                                </div>
+                                                <input id="posterURL" type="hidden" name="posterURL">
+                                                <div class="custom-file mb-2">
+                                                    <input type="file" accept="image/*" asp-for="Upload"
+                                                           class="form-control" onchange="showImgPreview(this)" />
+                                                    <span asp-validation-for="Upload" class="text-danger"></span>
+                                                    <img id="imgPreview" src="/Uploads/profile_pic.png" class="border img-thumbnail img-fluid rounded circle" style="height:150px !important;width:150px !important;display:block !important;margin: auto !important;" />
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <input type="submit" value="Save" class="btn btn-primary" />
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="card mb-3">
+                    <div class="card-body">
+                            <div class="row">
+                                <label class="form-label col-sm-3" for="form3Examplea9" asp-for="MyUser.Name"></label>
+                                <input type="text" id="form3Examplea9" class="form-control form-control-lg col-sm-9 text-secondary" asp-for="MyUser.Name" />
+                                <span asp-validation-for="MyUser.Name" class="text-danger"></span>
+                            </div>
+                            <hr>
+                        <div class="row">
+                                <label class="form-label col-sm-3" for="form3Examplea9" asp-for="MyUser.CCno"></label>
+                                <input type="text" id="form3Examplea9" class="form-control form-control-lg col-sm-9 text-secondary" asp-for="MyUser.CCno" />
+                                <span asp-validation-for="MyUser.CCno" class="text-danger"></span>
+                            </div>
+                            <hr>
+                        <div class="row">
+                                <label class="form-label col-sm-3" for="form3Examplea9" asp-for="MyUser.Gender"></label>
+                                <input type="text" id="form3Examplea9" class="form-control form-control-lg col-sm-9 text-secondary" asp-for="MyUser.Gender" />
+                                <span asp-validation-for="MyUser.Gender" class="text-danger"></span>
+                        </div>
+                        <hr>
+                        <div class="row">
+                                <label class="form-label col-sm-3" for="form3Examplea9" asp-for="MyUser.Email"></label>
+                                <input type="text" id="form3Examplea9" class="form-control form-control-lg col-sm-9 text-secondary" asp-for="MyUser.Email" />
+                                <span asp-validation-for="MyUser.Email" class="text-danger"></span>
+                        </div>
+                        <hr>
+                        <div class="row">
+                                <label class="form-label col-sm-3" for="form3Examplea9" asp-for="MyUser.Phone"></label>
+                                <input type="text" id="form3Examplea9" class="form-control form-control-lg col-sm-9 text-secondary" asp-for="MyUser.Phone" />
+                                <span asp-validation-for="MyUser.Phone" class="text-danger"></span>
+                        </div>
+                        <hr>
+                        <div class="row">
+                                <label class="form-label col-sm-3" for="form3Examplea9" asp-for="MyUser.Address"></label>
+                                <input type="text" id="form3Examplea9" class="form-control form-control-lg col-sm-9 text-secondary" asp-for="MyUser.Address" />
+                                <span asp-validation-for="MyUser.Address" class="text-danger"></span>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <label class="form-label col-sm-3" for="form3Examplea9" asp-for="MyUser.Aboutme"></label>
+                            <input type="text" id="form3Examplea9" class="form-control form-control-lg col-sm-9 text-secondary" asp-for="MyUser.Aboutme" />
+                            <span asp-validation-for="MyUser.Aboutme" class="text-danger"></span>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <label class="form-label col-sm-3" for="form3Examplea9" asp-for="MyUser.Password"></label>
+                                <input type="password" id="form3Examplea9" class="form-control form-control-lg col-sm-9 text-secondary" asp-for="MyUser.Password" />
+                            <span asp-validation-for="MyUser.Password" class="text-danger"></span>
+                        </div>
+                        <hr>
+                        <div class="row">
+                                <label class="form-label col-sm-3" for="form3Examplea9" asp-for="MyUser.CfmPassword"></label>
+                                <input type="password" id="form3Examplea9" class="form-control form-control-lg col-sm-9 text-secondary" asp-for="MyUser.CfmPassword" />
+                            <span asp-validation-for="MyUser.CfmPassword" class="text-danger"></span>
+                        </div>
+                        <hr>
+                           <input type="submit" value="Register" style="color: white;text-decoration: none;" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        </form>
+    </div>
+</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+<script>
+    // Get the modal
+    var modal = document.getElementById('id01');
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function (event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+    var imagePreview = function (event) {
+        var reader = new FileReader();
+        reader.onload = function () {
+            var output = document.getElementById('pfp');
+            output.src = reader.result;
+        };
+        reader.readAsDataURL(event.target.files[0]);
+    };
+    function showImgPreview(input) {
+        if (input.files[0]) {
+            var uploadimg = new FileReader();
+            uploadimg.onload = function (displayimg) {
+                $("#imgPreview").attr('src', displayimg.target.result);
+            }
+            uploadimg.readAsDataURL(input.files[0]);
+        }
+    }
+</script>
