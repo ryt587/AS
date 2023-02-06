@@ -36,6 +36,9 @@ namespace _211933MAssn.Migrations
                     Address = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     ImageURL = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     Aboutme = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Isloggedin = table.Column<bool>(type: "bit", nullable: false),
+                    Minpsage = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Maxpsage = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -162,6 +165,27 @@ namespace _211933MAssn.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Logs",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Action = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DateCreated = table.Column<DateTime>(name: "Date_Created", type: "datetime2", nullable: false),
+                    LogUserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Logs", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Logs_AspNetUsers_LogUserId",
+                        column: x => x.LogUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -200,6 +224,11 @@ namespace _211933MAssn.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Logs_LogUserId",
+                table: "Logs",
+                column: "LogUserId");
         }
 
         /// <inheritdoc />
@@ -219,6 +248,9 @@ namespace _211933MAssn.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
+
+            migrationBuilder.DropTable(
+                name: "Logs");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

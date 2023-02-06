@@ -8,12 +8,14 @@ namespace _211933M_Assn.Services
     public class EmailSender : IEmailSender
     {
         private readonly ILogger _logger;
+        private readonly IConfiguration _config;
 
         public EmailSender(IOptions<AuthMessageSenderOptions> optionsAccessor,
-                           ILogger<EmailSender> logger)
+                           ILogger<EmailSender> logger, IConfiguration _config)
         {
             Options = optionsAccessor.Value;
             _logger = logger;
+            this._config = _config;
         }
 
         public AuthMessageSenderOptions Options { get; } //Set with Secret Manager.
@@ -25,10 +27,10 @@ namespace _211933M_Assn.Services
 
         public async Task Execute(string subject, string message, string toEmail)
         {
-            var client = new SendGridClient("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");
+            var client = new SendGridClient(_config["SendGrid:Key"]);
             var msg = new SendGridMessage()
             {
-                From = new EmailAddress("ryanteoxuebin@gmail.com", "App Security"),
+                From = new EmailAddress("nigelngyingxuan@gmail.com", "App Security"),
                 Subject = subject,
                 PlainTextContent = message,
                 HtmlContent = message

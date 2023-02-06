@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using _211933M_Assn.Models;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 
 namespace _211933M_Assn
 {
@@ -18,8 +19,10 @@ namespace _211933M_Assn
         {
             string connectionString = _configuration.GetConnectionString("MyConnection");
             optionsBuilder.UseSqlServer(connectionString);
-        }
+
+		}
         //DbSet = table in db
         public DbSet<User> AspNetUsers { get; set; }
+        public DbSet<Log> Logs { get; set; }
     }
 }

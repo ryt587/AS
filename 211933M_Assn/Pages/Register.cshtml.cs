@@ -6,10 +6,13 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.DataProtection;
+using AspNetCore.ReCaptcha;
+using Microsoft.AspNetCore.Authorization;
 
 namespace _211933M_Assn.Pages
 {
-	[ValidateAntiForgeryToken]
+    //[ValidateReCaptcha]
+    [ValidateAntiForgeryToken]
 	public class RegisterModel : PageModel
     {
         public class RUser
@@ -50,50 +53,60 @@ namespace _211933M_Assn.Pages
         }
         private IWebHostEnvironment _environment;
         private EmailSender _emailsender;
+        private EncodingService encoding;
         private UserManager<User> userManager { get; }
         private SignInManager<User> signInManager { get; }
 		private readonly RoleManager<IdentityRole> roleManager;
+        private readonly LogService logService;
+        private IReCaptchaService reCaptchaService { get; }
 
-		public RegisterModel(IWebHostEnvironment environment, UserManager<User> userManager, SignInManager<User> signInManager, EmailSender emailsender,
-			RoleManager<IdentityRole> roleManager)
+        public RegisterModel(IWebHostEnvironment environment, UserManager<User> userManager, SignInManager<User> signInManager, EmailSender emailsender,
+			RoleManager<IdentityRole> roleManager, EncodingService encoding, LogService logService, IReCaptchaService reCaptchaService)
         {
             _environment = environment;
             this.userManager = userManager;
             this.signInManager = signInManager;
             _emailsender = emailsender;
             this.roleManager = roleManager;
+            this.encoding = encoding;
+            this.logService = logService;
+            this.reCaptchaService = reCaptchaService;
 
 		}
         [BindProperty]
         public RUser MyUser { get; set; } = new();
-        [BindProperty]
-        public IFormFile? Upload { get; set; }
+        [BindProperty, Required]
+        [AllowedExtension(new string[] { ".jpg" })]
+        public IFormFile? Upload { get; set; } = null;
         public static List<User> UserList { get; set; } = new();
 
         public void OnGet()
         {
+            
         }
-		public async Task<IActionResult> OnPostAsync()
+        public async Task<IActionResult> OnPostAsync()
         {
             if (ModelState.IsValid)
             {
                 User? user = await userManager.FindByEmailAsync(MyUser.Email);
                 if (user != null)
                 {
+                    TempData["FlashMessage.Type"] = "danger";
+                    TempData["FlashMessage.Text"] = string.Format(MyUser.Email+" has been used");
                     return Page();
 
                 }
 				var dataProtectionProvider = DataProtectionProvider.Create("EncryptData");
 				var protector = dataProtectionProvider.CreateProtector("MySecretKey");
 				//check employeeID
-				User newuser = new User { UserName = MyUser.Name, CCno = protector.Protect(MyUser.CCno), Gender = MyUser.Gender, Phone = MyUser.Phone, Address = MyUser.Address, Aboutme = MyUser.Aboutme, Email = MyUser.Email};
+				User newuser = new User { UserName = MyUser.Name, CCno = protector.Protect(MyUser.CCno), Gender = EncodingService.EncodingMethod(MyUser.Gender), Phone = MyUser.Phone, Address = EncodingService.EncodingMethod(MyUser.Address), Aboutme = EncodingService.EncodingMethod(MyUser.Aboutme), Email = MyUser.Email};
                 if (Upload != null)
                 {
                     if (Upload.Length > 2 * 1024 * 1024)
                     {
                         ModelState.AddModelError("Upload",
                         "File size cannot exceed 2MB.");
-                        return Page();
+                        return Page();  
                     }
                     var uploadsFolder = "uploads";
                     var imageFile = Guid.NewGuid() + Path.GetExtension(Upload.FileName);
@@ -106,13 +119,21 @@ namespace _211933M_Assn.Pages
                 var result = await userManager.CreateAsync(newuser, MyUser.Password);
                 if (result.Succeeded)
                 {
+                    Log log = new Log { Type = "New Account", Action = newuser.UserName + " makes a new account", LogUser = newuser };
+                    logService.AddLog(log);
                     var token = await userManager.GenerateEmailConfirmationTokenAsync(newuser);
                     var confirmation = Url.Action("ConfirmEmail", "Account", new { userId = newuser.Id, token }, Request.Scheme);
                     await _emailsender.Execute("Account Verfication", confirmation, MyUser.Email);
+                    TempData["FlashMessage.Type"] = "success";
+                    TempData["FlashMessage.Text"] = string.Format("Email has been sent for confirmation");
                     return Redirect("/");
                 }
+                TempData["FlashMessage.Type"] = "danger";
+                TempData["FlashMessage.Text"] = string.Format(result.ToString());
                 return Page();
             }
+            TempData["FlashMessage.Type"] = "danger";
+            TempData["FlashMessage.Text"] = string.Format("Invalid Registration");
             return Page();
         }
     }

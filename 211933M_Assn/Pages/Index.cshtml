@@ -1,5 +1,6 @@
 ﻿@page
 @model IndexModel
+@inject IHttpContextAccessor contxt;
 @{
     ViewData["Title"] = "Home page";
 }
@@ -109,10 +110,11 @@
                 </h2>
             </div>
             <p>
-                Normal distribution of letters, as opposed to using 'Content here, content here', making it look like
-                readable English. Many desktop publishing packages and web page editors has a more-or-less normal
-                distribution of letters, as opposed to using 'Content here, content here', making it look like readable
-                English. Many desktop publishing packages and web page editors
+                <ul>
+                    <li> Name: @contxt.HttpContext.Session.GetString("Name")</li>
+                    <li> Email: @contxt.HttpContext.Session.GetString("Email")</li>
+                    <li> CreditCard: @contxt.HttpContext.Session.GetString("CreditCard")</li>
+                </ul>
             </p>
         </div>
         <div class="col-md-9 mx-auto px-0">

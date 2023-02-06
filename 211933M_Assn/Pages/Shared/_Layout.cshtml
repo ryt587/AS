@@ -1,6 +1,8 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using _211933M_Assn.Models
 @inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
+@using AspNetCore.ReCaptcha
 <!DOCTYPE html>
 <html>
 
@@ -54,7 +56,7 @@
                                 <a class="nav-link" href="shop.html">Shop</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="blog.html">Blog</a>
+                                <a class="nav-link" asp-area="" asp-page="/Privacy">Privacy</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="">
@@ -69,6 +71,11 @@
                             @{
                                 if (SignInManager.IsSignedIn(User))
                                 {
+                                    var user = await UserManager.GetUserAsync(User);
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="/changepassword?email=@user.Email">Change Password
+                                        </a>
+                                    </li>
                                     <li class="nav-item">
                                         <a class="nav-link" asp-area="" asp-page="/Logout">
                                             <i class="fa fa-sign-out" aria-hidden="true"></i>
@@ -92,6 +99,7 @@
         <!-- end header section -->
         <!-- end slider section -->
     </div>
+    @await Html.PartialAsync("_FlashMessage")
     @RenderBody()
     <!-- info section -->
     <section class="info_section ">
@@ -178,6 +186,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
     <!-- custom js -->
     <script src="js/custom.js"></script>
+    <script src="https://www.google.com/recaptcha/api.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/zxcvbn/4.2.0/zxcvbn.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 

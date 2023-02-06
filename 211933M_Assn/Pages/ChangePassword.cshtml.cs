@@ -1,19 +1,19 @@
 using _211933M_Assn.Models;
-using _211933M_Assn.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using System.ComponentModel.DataAnnotations;
-using System.Text;
 
-namespace _211933M_Assn.Pages.ForgotPassword
+namespace _211933M_Assn.Pages
 {
-    public class ResetPasswordModel : PageModel
+    [Authorize]
+    public class ChangePasswordModel : PageModel
     {
         private readonly UserManager<User> _userManager;
 
-        public ResetPasswordModel(UserManager<User> userManager)
+        public ChangePasswordModel(UserManager<User> userManager)
         {
             _userManager = userManager;
         }
@@ -23,7 +23,7 @@ namespace _211933M_Assn.Pages.ForgotPassword
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         [BindProperty]
-        public InputModel Input { get; set; }
+        public InputModel Input { get; set; } = new();
 
         /// <summary>
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
@@ -35,9 +35,12 @@ namespace _211933M_Assn.Pages.ForgotPassword
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
+            /// [Required]
             [Required]
-            [EmailAddress]
             public string Email { get; set; }
+            [Required]
+            [DataType(DataType.Password)]
+            public string OldPassword { get; set; }
 
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
@@ -56,30 +59,13 @@ namespace _211933M_Assn.Pages.ForgotPassword
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
 
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
-            [Required]
-            public string Code { get; set; }
-
         }
 
-        public IActionResult OnGet(string code, string email)
+        public IActionResult OnGet(string email)
         {
-            if (code == null)
-            {
-                return BadRequest("A code must be supplied for password reset.");
-            }
-            else
-            {
-                Input = new InputModel
-                {
-                    Code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code)),
-                    Email = email
-                };
-                return Page();
-            }
+            System.Diagnostics.Debug.WriteLine(email);
+            Input.Email = email;
+            return Page();
         }
 
         public async Task<IActionResult> OnPostAsync()
@@ -97,14 +83,7 @@ namespace _211933M_Assn.Pages.ForgotPassword
                 TempData["FlashMessage.Text"] = string.Format("User doesn't exist"); ;
                 return Redirect("/Users/ForgotPassword/AskEmail");
             }
-            PasswordVerificationResult hash = _userManager.PasswordHasher.VerifyHashedPassword(user, user.PasswordHash, Input.Password);
-            if (hash.ToString().Equals("Success"))
-            {
-                TempData["FlashMessage.Type"] = "danger";
-                TempData["FlashMessage.Text"] = string.Format("Password has been used on this account"); ;
-                return Page();
-            }
-            var result = await _userManager.ResetPasswordAsync(user, Input.Code, Input.Password);
+            var result = await _userManager.ChangePasswordAsync(user, Input.OldPassword, Input.Password);
             if (result.Succeeded)
             {
                 user.Minpsage = DateTime.Now.AddDays(1);
@@ -112,7 +91,7 @@ namespace _211933M_Assn.Pages.ForgotPassword
                 var aresult = await _userManager.UpdateAsync(user);
                 TempData["FlashMessage.Type"] = "success";
                 TempData["FlashMessage.Text"] = string.Format("Password have been reset"); ;
-                return Redirect("/Login");
+                return Redirect("/");
             }
 
             foreach (var error in result.Errors)

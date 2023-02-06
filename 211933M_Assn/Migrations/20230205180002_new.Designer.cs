@@ -12,7 +12,7 @@ using _211933M_Assn;
 namespace _211933MAssn.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20230124181811_new")]
+    [Migration("20230205180002_new")]
     partial class @new
     {
         /// <inheritdoc />
@@ -158,6 +158,35 @@ namespace _211933MAssn.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("_211933M_Assn.Models.Log", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Date_Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LogUserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LogUserId");
+
+                    b.ToTable("Logs");
+                });
+
             modelBuilder.Entity("_211933M_Assn.Models.User", b =>
                 {
                     b.Property<string>("Id")
@@ -198,11 +227,20 @@ namespace _211933MAssn.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<bool>("Isloggedin")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTime>("Maxpsage")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("Minpsage")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -296,6 +334,15 @@ namespace _211933MAssn.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("_211933M_Assn.Models.Log", b =>
+                {
+                    b.HasOne("_211933M_Assn.Models.User", "LogUser")
+                        .WithMany()
+                        .HasForeignKey("LogUserId");
+
+                    b.Navigation("LogUser");
                 });
 #pragma warning restore 612, 618
         }
