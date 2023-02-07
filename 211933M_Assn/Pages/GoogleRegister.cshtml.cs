@@ -1,6 +1,5 @@
 using _211933M_Assn.Models;
 using _211933M_Assn.Services;
-using AspNetCore.ReCaptcha;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -13,7 +12,6 @@ using SendGrid.Helpers.Mail;
 
 namespace _211933M_Assn.Pages
 {
-    [ValidateReCaptcha]
     [ValidateAntiForgeryToken]
     public class GoogleRegisterModel : PageModel
     {
@@ -81,72 +79,63 @@ namespace _211933M_Assn.Pages
         {
             if (ModelState.IsValid)
             {
-                User? user = await userManager.FindByEmailAsync(MyUser.Email);
+                User? user = await userManager.FindByEmailAsync(EncodingService.EncodingEmail(MyUser.Email));
                 if (user != null)
                 {
                     TempData["FlashMessage.Type"] = "danger";
                     TempData["FlashMessage.Text"] = string.Format("Email already exist");
                     return Page();
                 }
-                if (!user.Isloggedin)
+                var dataProtectionProvider = DataProtectionProvider.Create("EncryptData");
+                var protector = dataProtectionProvider.CreateProtector("MySecretKey");
+                //check employeeID
+                User newuser = new User { UserName = MyUser.Name, CCno = protector.Protect(MyUser.CCno), Gender = EncodingService.EncodingMethod(MyUser.Gender), Phone = MyUser.Phone, Address = EncodingService.EncodingMethod(MyUser.Address), Aboutme = EncodingService.EncodingMethod(MyUser.Aboutme), Email = EncodingService.EncodingEmail(MyUser.Email), ImageURL = MyUser.ImageURL };
+                newuser.EmailConfirmed = true;
+                if (Upload != null)
                 {
-                    var dataProtectionProvider = DataProtectionProvider.Create("EncryptData");
-                    var protector = dataProtectionProvider.CreateProtector("MySecretKey");
-                    //check employeeID
-                    User newuser = new User { UserName = MyUser.Name, CCno = protector.Protect(MyUser.CCno), Gender = EncodingService.EncodingMethod(MyUser.Gender), Phone = MyUser.Phone, Address = EncodingService.EncodingMethod(MyUser.Address), Aboutme = EncodingService.EncodingMethod(MyUser.Aboutme), Email = MyUser.Email, ImageURL = MyUser.ImageURL };
-                    newuser.EmailConfirmed = true;
-                    if (Upload != null)
+                    if (Upload.Length > 2 * 1024 * 1024)
                     {
-                        if (Upload.Length > 2 * 1024 * 1024)
-                        {
-                            ModelState.AddModelError("Upload",
-                             "File size cannot exceed 2MB.");
-                            return Page();
-                        }
-                        var uploadsFolder = "uploads";
-                        var imageFile = Guid.NewGuid() + Path.GetExtension(Upload.FileName);
-                        var imagePath = Path.Combine(_environment.ContentRootPath, "wwwroot", uploadsFolder, imageFile);
-                        using var fileStream = new FileStream(imagePath,
-                        FileMode.Create);
-                        await Upload.CopyToAsync(fileStream);
-                        newuser.ImageURL = string.Format("/{0}/{1}", uploadsFolder, imageFile);
+                        ModelState.AddModelError("Upload",
+                            "File size cannot exceed 2MB.");
+                        return Page();
                     }
-                    var result = await userManager.CreateAsync(newuser);
-                    if (result.Succeeded)
-                    {
-                        await signInManager.SignInAsync(newuser, true);
-                        var claims = new List<Claim> {
-                            new Claim(ClaimTypes.Name, "c@c.com"),
-                            new Claim(ClaimTypes.Email, "c@c.com")
-                            };
-                        var i = new ClaimsIdentity(claims, "MyCookieAuth");
-                        ClaimsPrincipal claimsPrincipal = new ClaimsPrincipal(i);
-                        await HttpContext.SignInAsync("MyCookieAuth", claimsPrincipal);
-                        contxt.HttpContext.Session.SetString("Name", newuser.UserName);
-                        contxt.HttpContext.Session.SetString("Email", newuser.Email);
-                        contxt.HttpContext.Session.SetString("CreditCard", protector.Unprotect(newuser.CCno));
-                        TempData["FlashMessage.Type"] = "success";
-                        TempData["FlashMessage.Text"] = string.Format("Login Successful");
-                        Log log = new Log { Type = "Login", Action = newuser.UserName + "login to account", LogUser = newuser };
-                        newuser.Isloggedin = true;
-                        var aresult = await userManager.UpdateAsync(newuser);
-                        logService.AddLog(log);
-                        return Redirect("/");
-                    }
-                    TempData["FlashMessage.Type"] = "danger";
-                    TempData["FlashMessage.Text"] = string.Format("Login Failed");
-                    return Redirect("/error");
+                    var uploadsFolder = "uploads";
+                    var imageFile = Guid.NewGuid() + Path.GetExtension(Upload.FileName);
+                    var imagePath = Path.Combine(_environment.ContentRootPath, "wwwroot", uploadsFolder, imageFile);
+                    using var fileStream = new FileStream(imagePath,
+                    FileMode.Create);
+                    await Upload.CopyToAsync(fileStream);
+                    newuser.ImageURL = string.Format("/{0}/{1}", uploadsFolder, imageFile);
                 }
-                else
+                var result = await userManager.CreateAsync(newuser);
+                if (result.Succeeded)
                 {
-                    TempData["FlashMessage.Type"] = "danger";
-                    TempData["FlashMessage.Text"] = string.Format("User is logged in on other devices");
-                    return Page();
+                    await signInManager.SignInAsync(newuser, true);
+                    var claims = new List<Claim> {
+                        new Claim(ClaimTypes.Name, "c@c.com"),
+                        new Claim(ClaimTypes.Email, "c@c.com")
+                        };
+                    var i = new ClaimsIdentity(claims, "MyCookieAuth");
+                    ClaimsPrincipal claimsPrincipal = new ClaimsPrincipal(i);
+                    await HttpContext.SignInAsync("MyCookieAuth", claimsPrincipal);
+                    contxt.HttpContext.Session.SetString("Name", newuser.UserName);
+                    contxt.HttpContext.Session.SetString("Email", EncodingService.DecodingEmail(newuser.Email));
+                    contxt.HttpContext.Session.SetString("CreditCard", protector.Unprotect(newuser.CCno));
+                    TempData["FlashMessage.Type"] = "success";
+                    TempData["FlashMessage.Text"] = string.Format("Login Successful");
+                    Log log = new Log { Type = "Login", Action = newuser.UserName + "login to account", LogUser = newuser };
+                    newuser.Isloggedin = true;
+                    var aresult = await userManager.UpdateAsync(newuser);
+                    logService.AddLog(log);
+                    return Redirect("/");
                 }
+                TempData["FlashMessage.Type"] = "danger";
+                TempData["FlashMessage.Text"] = string.Format("Login Failed");
+                return Page();
             }
             TempData["FlashMessage.Type"] = "danger";
-            TempData["FlashMessage.Text"] = string.Format("Invalid Login");
-            return Redirect("/privacy");
+            TempData["FlashMessage.Text"] = string.Format("Invalid Login"+ModelState.ToString());
+            return Page();
         }
     }
 }

@@ -29,7 +29,7 @@ namespace _211933M_Assn.Pages
 			logService.AddLog(log);
             await signInManager.SignOutAsync();
             HttpContext.Session.Clear();
-            TempData["FlashMessage.Type"] = "Success";
+            TempData["FlashMessage.Type"] = "success";
             TempData["FlashMessage.Text"] = string.Format("Logout");
             return RedirectToPage("Login");
 		}

@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.OAuth.Claims;
+using Hangfire;
 
 var builder = WebApplication.CreateBuilder(args);
 var provider =builder.Services.BuildServiceProvider();
@@ -26,7 +27,6 @@ builder.Services.AddIdentity<User, IdentityRole>(options => {
     options.Lockout.MaxFailedAccessAttempts = 3;
     options.Password.RequiredLength = 12;
     options.User.RequireUniqueEmail = true;
-    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromSeconds(30);
 })
     .AddEntityFrameworkStores<MyDbContext>().AddDefaultTokenProviders();
 builder.Services.AddAntiforgery(options => options.HeaderName = "XSRF-TOKEN");
@@ -72,6 +72,9 @@ builder.Services.ConfigureApplicationCookie(options =>{
     options.SlidingExpiration= true;
 });
 
+builder.Services.AddHangfire(x => x.UseSqlServerStorage(builder.Configuration.GetConnectionString("MyConnection")));
+builder.Services.AddHangfireServer();
+
 builder.Services.AddScoped<EncodingService>();
 builder.Services.AddScoped<LogService>();
 builder.Services.AddScoped<UserService>();
@@ -93,6 +96,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseSession();
+
+app.UseHangfireDashboard();
 
 app.UseCookiePolicy(new CookiePolicyOptions
 {

@@ -33,5 +33,7 @@ namespace _211933M_Assn.Models
         public bool Isloggedin { get; set; } = false;
         public DateTime Minpsage { get; set; } = DateTime.Now.AddDays(1);
         public DateTime Maxpsage { get; set; } = DateTime.Now.AddDays(30);
+        public bool lockout = false;
+        public string? prevps;
 }
 }

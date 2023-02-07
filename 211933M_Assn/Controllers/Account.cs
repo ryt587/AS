@@ -81,7 +81,7 @@ namespace _211933M_Assn.Controllers
             // Use the user information for your application logic
 
             // Redirect to the original URL
-            var user = await _userManager.FindByEmailAsync(email);
+            var user = await _userManager.FindByEmailAsync(EncodingService.EncodingEmail(email));
             if (user == null)
             {
                 return Redirect(returnUrl ?? "/googleregister?email=" + email + "&name=" + name + "&pfp=" + pfp);
@@ -101,7 +101,7 @@ namespace _211933M_Assn.Controllers
                     ClaimsPrincipal claimsPrincipal = new ClaimsPrincipal(i);
                     await HttpContext.SignInAsync("MyCookieAuth", claimsPrincipal);
                     contxt.HttpContext.Session.SetString("Name", user.UserName);
-                    contxt.HttpContext.Session.SetString("Email", user.Email);
+                    contxt.HttpContext.Session.SetString("Email", EncodingService.EncodingEmail(user.Email));
                     contxt.HttpContext.Session.SetString("CreditCard", protector.Unprotect(user.CCno));
                     Log log = new Log { Type = "Login", Action = user.UserName + "login to account", LogUser = user };
                     logService.AddLog(log);

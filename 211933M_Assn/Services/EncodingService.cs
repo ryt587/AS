@@ -19,5 +19,21 @@
             string returnValue = System.Text.Encoding.UTF8.GetString(encodedDataAsBytes);
             return returnValue;
         }
+        public static string EncodingEmail(string Data)
+        {
+            var gmail = Data.Split("@")[0];
+            var provider = Data.Split("@")[1];
+            byte[] toEncodeAsBytes = System.Text.Encoding.UTF8.GetBytes(gmail);
+            string sReturnValues = System.Convert.ToBase64String(toEncodeAsBytes)+"@"+provider;
+            return sReturnValues;
+        }
+        public static string DecodingEmail(string Data)
+        {
+            var gmail = Data.Split("@")[0];
+            var provider = Data.Split("@")[1];
+            byte[] encodedDataAsBytes = System.Convert.FromBase64String(gmail);
+            string returnValue = System.Text.Encoding.UTF8.GetString(encodedDataAsBytes) +"@"+provider;
+            return returnValue;
+        }
     }
 }

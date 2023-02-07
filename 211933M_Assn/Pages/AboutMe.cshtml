@@ -1,0 +1,12 @@
+﻿@page
+@model _211933M_Assn.Pages.AboutMeModel
+@using Microsoft.AspNetCore.Identity
+@using _211933M_Assn.Models
+@inject UserManager<User> UserManager
+@{
+    var user = await UserManager.GetUserAsync(User);
+}
+<h1>@ViewData["Title"]</h1>
+
+<p>Hello @user.UserName, you are an admin</p>
+

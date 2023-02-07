@@ -299,7 +299,7 @@
                             <span asp-validation-for="MyUser.CfmPassword" class="text-danger"></span>
                         </div>
                             <div>
-                                <input type="password" id="form3Examplea9" class="form-control form-control-lg col-sm-9 text-secondary" asp-for="MyUser.CfmPassword" />
+                                <input type="hidden" id="recaptcha" class="g-recaptcha" data-sitekey="6LdfxlMkAAAAAGSJKxyknwagEaWFfTue4WuS0Pn4" />
                             </div>
                         <hr>
                            <input type="submit" value="Register" style="color: white;text-decoration: none;" />
@@ -393,6 +393,8 @@ password.addEventListener('input', function() {
                 if (!data) {
                     // $('#newsletter-form').find("input[type=submit]").prop("disabled",!data);
                     document.getElementById('g-recaptcha-error').innerHTML = "Recaptcha Error";
+                    document.getElementById('recaptcha').innerHTML = token;
+
                 }
             });
         });

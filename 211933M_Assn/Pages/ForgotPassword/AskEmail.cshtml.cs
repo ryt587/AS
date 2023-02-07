@@ -47,15 +47,14 @@ namespace _211933M_Assn.Pages.ForgotPassword
         {
             if (ModelState.IsValid)
             {
-                var user = await _userManager.FindByEmailAsync(Input.Email);
-                if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
+                var user = await _userManager.FindByEmailAsync(EncodingService.EncodingEmail(Input.Email));
+                if (user == null | !(await _userManager.IsEmailConfirmedAsync(user)))
                 {
                     // Don't reveal that the user does not exist or is not confirmed
                     TempData["FlashMessage.Type"] = "danger";
                     TempData["FlashMessage.Text"] = string.Format("User doesn't exist"); ;
                     return Page();
                 }
-
                 // For more information on how to enable account confirmation and password reset please
                 // visit https://go.microsoft.com/fwlink/?LinkID=532713
                 var code = await _userManager.GeneratePasswordResetTokenAsync(user);
@@ -63,7 +62,7 @@ namespace _211933M_Assn.Pages.ForgotPassword
                 var callbackUrl = Url.Page(
                     "/ForgotPassword/ResetPassword",
                     pageHandler: null,
-                    values: new { code, email = user.Email },
+                    values: new { code, email = EncodingService.DecodingEmail(user.Email) },
                     protocol: Request.Scheme);
                 await _emailSender.Execute("Reset Password", HtmlEncoder.Default.Encode(callbackUrl), Input.Email);
                 TempData["FlashMessage.Type"] = "success";

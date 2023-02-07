@@ -89,7 +89,7 @@ namespace _211933M_Assn.Pages.ForgotPassword
                 return Redirect("/error/404");
             }
 
-            var user = await _userManager.FindByEmailAsync(Input.Email);
+            var user = await _userManager.FindByEmailAsync(EncodingService.EncodingEmail(Input.Email));
             if (user == null)
             {
                 // Don't reveal that the user does not exist
@@ -98,12 +98,15 @@ namespace _211933M_Assn.Pages.ForgotPassword
                 return Redirect("/Users/ForgotPassword/AskEmail");
             }
             PasswordVerificationResult hash = _userManager.PasswordHasher.VerifyHashedPassword(user, user.PasswordHash, Input.Password);
-            if (hash.ToString().Equals("Success"))
+            PasswordVerificationResult hash2 = _userManager.PasswordHasher.VerifyHashedPassword(user, user.prevps, Input.Password);
+            if (hash.ToString().Equals("Success")| hash2.ToString().Equals("Success"))
             {
                 TempData["FlashMessage.Type"] = "danger";
                 TempData["FlashMessage.Text"] = string.Format("Password has been used on this account"); ;
                 return Page();
             }
+            user.prevps=user.PasswordHash.ToString();
+            await _userManager.UpdateAsync(user);
             var result = await _userManager.ResetPasswordAsync(user, Input.Code, Input.Password);
             if (result.Succeeded)
             {

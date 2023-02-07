@@ -56,10 +56,14 @@ namespace _211933M_Assn.Pages.Shared
 				var protector = dataProtectionProvider.CreateProtector("MySecretKey");
                 //check employeeID
                 System.Diagnostics.Debug.WriteLine(MyUser.email);
-                User? user = await userManager.FindByEmailAsync(MyUser.email);
+                User? user = await userManager.FindByEmailAsync(EncodingService.EncodingEmail(MyUser.email));
 				var otpresult = await userManager.VerifyTwoFactorTokenAsync(user, TokenOptions.DefaultEmailProvider, MyUser.twofa);
 				if (user != null & otpresult)
 				{
+					if (EncodingService.DecodingEmail(user.Email) == "ryanteoxuebin@gmail.com")
+					{
+                        var adminresult = await userManager.AddToRoleAsync(user, "Admin");
+                    }
 					await signInManager.SignInAsync(user, MyUser.rmb);
 					Log log = new Log { Type = "Login", Action = user.UserName + "login to account", LogUser = user };
 					logService.AddLog(log);
@@ -71,7 +75,7 @@ namespace _211933M_Assn.Pages.Shared
 					ClaimsPrincipal claimsPrincipal = new ClaimsPrincipal(i);
 					await HttpContext.SignInAsync("MyCookieAuth", claimsPrincipal);
 					contxt.HttpContext.Session.SetString("Name", user.UserName);
-					contxt.HttpContext.Session.SetString("Email", user.Email);
+					contxt.HttpContext.Session.SetString("Email", EncodingService.DecodingEmail(user.Email));
 					contxt.HttpContext.Session.SetString("CreditCard", protector.Unprotect(user.CCno));
 					user.Isloggedin = true;
 					user.TwoFactorEnabled = false;

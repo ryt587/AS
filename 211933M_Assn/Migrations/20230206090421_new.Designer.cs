@@ -12,7 +12,7 @@ using _211933M_Assn;
 namespace _211933MAssn.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20230205180002_new")]
+    [Migration("20230206090421_new")]
     partial class @new
     {
         /// <inheritdoc />

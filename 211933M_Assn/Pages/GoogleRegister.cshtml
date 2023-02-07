@@ -231,11 +231,7 @@
                             <label class="form-label col-sm-3" for="form3Examplea9" asp-for="MyUser.Aboutme"></label>
                             <input type="text" id="form3Examplea9" class="form-control form-control-lg col-sm-9 text-secondary" asp-for="MyUser.Aboutme" />
                             <span asp-validation-for="MyUser.Aboutme" class="text-danger"></span>
-                        </div>
-                            <button class="g-recaptcha"
-                                    data-sitekey="6Lc-Hi8kAAAAAMXgBqJZRHVs35ZfS_lSFxGeVx_E">
-                                Recaptcha
-                            </button>
+                            </div>
                         <hr>
                            <input type="submit" value="Register" style="color: white;text-decoration: none;" />
                     </div>
@@ -276,5 +272,5 @@
             }
             uploadimg.readAsDataURL(input.files[0]);
         }
-    }
+    } 
 </script>

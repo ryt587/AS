@@ -88,7 +88,7 @@ namespace _211933M_Assn.Pages
         {
             if (ModelState.IsValid)
             {
-                User? user = await userManager.FindByEmailAsync(MyUser.Email);
+                User? user = await userManager.FindByEmailAsync(EncodingService.EncodingEmail(MyUser.Email));
                 if (user != null)
                 {
                     TempData["FlashMessage.Type"] = "danger";
@@ -96,10 +96,21 @@ namespace _211933M_Assn.Pages
                     return Page();
 
                 }
-				var dataProtectionProvider = DataProtectionProvider.Create("EncryptData");
+
+                IdentityRole role = await roleManager.FindByIdAsync("Admin");
+                if (role == null)
+                {
+                    IdentityResult result2 = await roleManager.CreateAsync(new IdentityRole("Admin"));
+                    if (!result2.Succeeded)
+                    {
+                        ModelState.AddModelError("", "Create role admin failed");
+                    }
+                }
+
+                var dataProtectionProvider = DataProtectionProvider.Create("EncryptData");
 				var protector = dataProtectionProvider.CreateProtector("MySecretKey");
 				//check employeeID
-				User newuser = new User { UserName = MyUser.Name, CCno = protector.Protect(MyUser.CCno), Gender = EncodingService.EncodingMethod(MyUser.Gender), Phone = MyUser.Phone, Address = EncodingService.EncodingMethod(MyUser.Address), Aboutme = EncodingService.EncodingMethod(MyUser.Aboutme), Email = MyUser.Email};
+				User newuser = new User { UserName = MyUser.Name, CCno = protector.Protect(MyUser.CCno), Gender = EncodingService.EncodingMethod(MyUser.Gender), Phone = MyUser.Phone, Address = EncodingService.EncodingMethod(MyUser.Address), Aboutme = EncodingService.EncodingMethod(MyUser.Aboutme), Email = EncodingService.EncodingEmail(MyUser.Email) };
                 if (Upload != null)
                 {
                     if (Upload.Length > 2 * 1024 * 1024)
