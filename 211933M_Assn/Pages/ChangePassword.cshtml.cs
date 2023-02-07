@@ -75,7 +75,7 @@ namespace _211933M_Assn.Pages
                 return Redirect("/error/404");
             }
 
-            var user = await _userManager.FindByEmailAsync(EncodingService.EncodingEmail(Input.Email));
+            var user = await _userManager.FindByEmailAsync(Input.Email);
             if (user == null)
             {
                 // Don't reveal that the user does not exist

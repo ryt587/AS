@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace _211933M_Assn.Pages
 {
-    //[ValidateReCaptcha]
+    [ValidateReCaptcha]
     [ValidateAntiForgeryToken]
 	public class RegisterModel : PageModel
     {

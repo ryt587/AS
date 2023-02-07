@@ -114,7 +114,7 @@ namespace _211933M_Assn.Pages
                                 user.lockout = true;
                                 await userManager.UpdateAsync(user);
                                 var client = new BackgroundJobClient();
-                                var jobId = client.Schedule( () => _emailsender.Execute("Account Lockout Recovery", callbackUrl, EncodingService.DecodingEmail(user.Email)),TimeSpan.FromMinutes(5));
+                                var jobId = client.Schedule( () => _emailsender.Execute("Account Lockout Recovery", callbackUrl, user.Email),TimeSpan.FromMinutes(5));
                                 TempData["FlashMessage.Type"] = "danger";
                                 TempData["FlashMessage.Text"] = string.Format("Account is lockout");
                                 return Page();

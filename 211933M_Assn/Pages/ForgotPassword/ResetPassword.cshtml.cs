@@ -98,7 +98,11 @@ namespace _211933M_Assn.Pages.ForgotPassword
                 return Redirect("/Users/ForgotPassword/AskEmail");
             }
             PasswordVerificationResult hash = _userManager.PasswordHasher.VerifyHashedPassword(user, user.PasswordHash, Input.Password);
-            PasswordVerificationResult hash2 = _userManager.PasswordHasher.VerifyHashedPassword(user, user.prevps, Input.Password);
+            PasswordVerificationResult? hash2 = null;
+            if (user.prevps != null)
+            {
+                hash2 = _userManager.PasswordHasher.VerifyHashedPassword(user, user.prevps, Input.Password);
+            }
             if (hash.ToString().Equals("Success")| hash2.ToString().Equals("Success"))
             {
                 TempData["FlashMessage.Type"] = "danger";
